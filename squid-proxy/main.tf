@@ -104,7 +104,7 @@ resource "aws_launch_template" "squid-as-lc" {
 
 # Auto Scaling Group
 resource "aws_autoscaling_group" "squid-asg" {
-    availability_zones   = aws_subnet.public_subnet.*.availability_zone
+    vpc_zone_identifier  = aws_subnet.public_subnet.*.id
     desired_capacity     = var.desired_capacity
     max_size             = var.max_size
     min_size             = var.min_size
