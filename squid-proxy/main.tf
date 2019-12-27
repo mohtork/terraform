@@ -58,6 +58,27 @@ resource "aws_route_table_association" "squid_public_subnet" {
     route_table_id = aws_route_table.squid-rt-public.id
 }
 
+# Create Squid Security Group
+resource "aws_security_group" "squid-sg" {
+    name        = "${var.prefix}-sg"
+    description = "Allow Squid port"
+    vpc_id      = aws_vpc.squid_vpc.id
+
+ingress {
+  from_port   = 3128
+  to_port     = 3128
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
+
+egress {
+  from_port   = 0
+  to_port     = 65535
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+}
+}
+
 # Create Network Load Balancer
 resource "aws_lb" "squid-lb" {
     name               = var.prefix
@@ -92,6 +113,7 @@ resource "aws_launch_template" "squid-as-lc" {
     instance_type                        = var.instance_type
     key_name                             = var.key_name
     instance_initiated_shutdown_behavior = var.shutdown_behavior
+    vpc_security_group_ids               = [aws_security_group.squid-sg.id]
     block_device_mappings {
         device_name = "/dev/xvda"
         ebs {
