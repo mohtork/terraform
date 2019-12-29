@@ -57,5 +57,53 @@ variable "max_size" {
 
 variable "min_size" {
     description = "Minimum number of EC2s in Autoscal Group"
-    type       = number
+    type        = number
+}
+
+variable "ingress_from_port" {
+  description = "The start port"
+  type        = number
+  default     = 3128
+}
+
+variable "ingress_to_port" {
+  description = "The end port"
+  type        = number
+  default     = 3128
+}
+
+variable "ingress_protocol" {
+  description = "The protocol"
+  type        = string
+  default     = "tcp"
+}
+
+variable "ingress_cidr_blocks" {
+  description = "List of CIDR blocks"
+  type        = list
+  default     = ["0.0.0.0/0"]
+}
+
+variable "egress_from_port" {
+  description = "The start port"
+  type        = number
+  default     = 0
+}
+
+variable "egress_to_port" {
+  description = "The end port"
+  type        = number
+  default     = 65535
+}
+
+variable "egress_protocol" {
+  description = "The protocol"
+  type        = string
+  default     = "tcp"
+}
+
+variable "egress_cidr_blocks" {
+  description = "List of CIDR blocks"
+  type        = list
+  default     = ["0.0.0.0/0"]
 }
