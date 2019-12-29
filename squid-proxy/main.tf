@@ -4,7 +4,7 @@ resource "aws_vpc" "squid_vpc"  {
     enable_dns_hostnames = true
 
     tags = {
-        Name = "squid-proxy-vpc"
+        Name = "${var.prefix}-vpc"
     }
 }
 
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "squid-gw" {
     vpc_id = aws_vpc.squid_vpc.id
 
     tags = {
-        Name = "squid-igw"
+        Name = "${var.prefix}-igw"
     }
 }
 
@@ -46,7 +46,7 @@ resource "aws_route_table" "squid-rt-public" {
    }
 
    tags = {
-       Name = "squid-rt"
+       Name = "${var.prefix}-rt"
    } 
 }
 
@@ -65,23 +65,23 @@ resource "aws_security_group" "squid-sg" {
     vpc_id      = aws_vpc.squid_vpc.id
 
 ingress {
-  from_port   = 3128
-  to_port     = 3128
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
+  from_port   = var.ingress_from_port
+  to_port     = var.ingress_to_port
+  protocol    = var.ingress_protocol
+  cidr_blocks = var.ingress_cidr_blocks
   }
 
 egress {
-  from_port   = 0
-  to_port     = 65535
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
+  from_port   = var.egress_from_port
+  to_port     = var.egress_to_port
+  protocol    = var.egress_protocol
+  cidr_blocks = var.egress_cidr_blocks
 }
 }
 
 # Create Network Load Balancer
 resource "aws_lb" "squid-lb" {
-    name               = var.prefix
+    name               = "${var.prefix}-lb"
     internal           = false
     load_balancer_type = "network"
     subnets            = aws_subnet.public_subnet.*.id
@@ -100,15 +100,15 @@ resource "aws_lb_listener" "squid-nlb" {
 }
 
 resource "aws_lb_target_group" "squid-tg" {
-    name     = var.prefix
-    port     = 3128
+    name     = "${var.prefix}-tg"
+    port     = var.ingress_to_port
     protocol = "TCP"
     vpc_id   = aws_vpc.squid_vpc.id
 }
 
 # Launch Autoscaling Configuration
 resource "aws_launch_template" "squid-as-lc" {
-    name_prefix                          = var.prefix
+    name_prefix                          = "${var.prefix}-lt"
     image_id                             = var.image_id
     instance_type                        = var.instance_type
     key_name                             = var.key_name
